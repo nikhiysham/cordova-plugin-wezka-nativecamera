@@ -218,6 +218,9 @@ public class CameraActivity extends Activity implements SensorEventListener {
         if(isFlash) {
             flashButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    if (camera == null) {
+                        return;
+                    }
                     Parameters p = camera.getParameters();
                     if (led == 0) {
                         p.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
