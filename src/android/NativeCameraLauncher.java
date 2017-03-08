@@ -362,4 +362,34 @@ public class NativeCameraLauncher extends CordovaPlugin {
 
 		return cache.getAbsolutePath();
 	}
+
+	@Override
+	public void onRestoreStateForActivityResult(Bundle state, CallbackContext callbackContext) {
+		this.callbackContext = callbackContext;
+
+		this.mQuality = state.getInt("mQuality");
+		this.targetWidth = state.getInt("targetWidth");
+		this.targetHeight = state.getInt("targetHeight");
+
+		this.imageUri = state.getParcelable("imageUri");
+		this.photo = (File) state.getSerializable("photo");
+
+		this.date = state.getString("date");
+
+		super.onRestoreStateForActivityResult(state, callbackContext);
+	}
+
+	@Override
+	public Bundle onSaveInstanceState() {
+
+		Bundle state = new Bundle();
+		state.putInt("mQuality", mQuality);
+		state.putInt("targetWidth", targetWidth);
+		state.putInt("targetHeight", targetHeight);
+		state.putString("date", date);
+		state.putParcelable("imageUri", imageUri);
+		state.putSerializable("photo", photo);
+
+		return state;
+	}
 }
