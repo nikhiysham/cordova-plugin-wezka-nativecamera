@@ -172,7 +172,7 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
 				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
 
-				bitmap = scaleBitmap(bitmap);
+				// bitmap = scaleBitmap(bitmap);
 				//Immediately clear the memory associated with previous bitmap
 				System.gc();
 
@@ -185,7 +185,7 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				// Log.i(LOG_TAG, "*First rotate then compress*");
 				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
 				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
-				bitmap = getRotatedBitmap(rotate, bitmap, exif);
+				// bitmap = getRotatedBitmap(rotate, bitmap, exif);
 				Log.i(LOG_TAG, "URI: " + this.imageUri.toString());
 				OutputStream os = this.cordova.getActivity().getContentResolver()
 						.openOutputStream(this.imageUri);
@@ -214,10 +214,18 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				exif.createOutFile(this.imageUri.getPath());
 				exif.writeExifData();
 
+				JSONObject returnObject = new JSONObject();
+				returnObject.put("url", this.imageUri.toString());
+				returnObject.put("rotation", rotate);
+
+				Log.i(LOG_TAG, "Return data: " + returnObject.toString());
+
+				PluginResult result = new PluginResult(PluginResult.Status.OK, returnObject);
+
 				// Log.i(LOG_TAG, "Final Exif orientation value: " + exif.getOrientation());
 
 				// Send Uri back to JavaScript for viewing image
-				this.callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, this.imageUri.toString()));
+				this.callbackContext.sendPluginResult(result);
 
 				bitmap.recycle();
 				bitmap = null;
