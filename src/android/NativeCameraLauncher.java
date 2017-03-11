@@ -233,6 +233,9 @@ public class NativeCameraLauncher extends CordovaPlugin {
 			} catch (IOException e) {
 				e.printStackTrace();
 				this.failPicture("Error capturing image.");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				this.failPicture("Error capturing image.");
 			}
 		}
 
