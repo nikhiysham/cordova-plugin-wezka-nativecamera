@@ -348,10 +348,12 @@ public class CameraActivity extends Activity implements SensorEventListener {
     }
 
     void restartPreview(int isFront) {
-        if (inPreview) {
-            camera.stopPreview();
+        if (camera != null) {
+            if (inPreview) {
+                camera.stopPreview();
+            }
+            camera.release();
         }
-        camera.release();
         camera = Camera.open(isFront);
         initPreview(preview.getHeight());
         startPreview();
