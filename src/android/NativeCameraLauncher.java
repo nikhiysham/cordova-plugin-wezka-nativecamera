@@ -141,7 +141,7 @@ public class NativeCameraLauncher extends CordovaPlugin {
 		if (resultCode == Activity.RESULT_OK) {
 			int rotate = 0;
 			try {
-				// check if the image was written to
+				// Check if the image was written to
 				BitmapFactory.Options options = new BitmapFactory.Options();
 				options.inJustDecodeBounds = true;
 				Bitmap bitmap = BitmapFactory.decodeFile(this.imageUri.getPath(), options);
@@ -150,78 +150,11 @@ public class NativeCameraLauncher extends CordovaPlugin {
 					return;
 				}
 				
-				// Create an ExifHelper to save the exif data that is lost
-				// during compression
-
 				ExifHelper exif = new ExifHelper();
 				exif.createInFile(this.imageUri.getPath());
 				exif.readExifData();
 				rotate = exif.getOrientation();
 				Log.i(LOG_TAG, "Uncompressed image rotation value: " + rotate);
-
-				// Read in bitmap of captured image
-//				Bitmap bitmap;
-//				try {
-//					bitmap = android.provider.MediaStore.Images.Media
-//							.getBitmap(this.cordova.getActivity().getContentResolver(), imageUri);
-//				} catch (FileNotFoundException e) {
-//					Uri uri = intent.getData();
-//					android.content.ContentResolver resolver = this.cordova.getActivity().getContentResolver();
-//					bitmap = android.graphics.BitmapFactory
-//							.decodeStream(resolver.openInputStream(uri));
-//				}
-//
-//				// If bitmap cannot be decoded, this may return null
-//				if (bitmap == null) {
-//					this.failPicture("Error decoding image.");
-//					return;
-//				}
-
-				// Log.i(LOG_TAG, "*Memory before scaling: *");
-				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
-				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
-
-				// bitmap = scaleBitmap(bitmap);
-				//Immediately clear the memory associated with previous bitmap
-//				System.gc();
-
-				// Log.i(LOG_TAG, "*Memory after scaling: *");
-				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
-				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
-
-				// Add compressed version of captured image to returned media
-				// store Uri
-				// Log.i(LOG_TAG, "*First rotate then compress*");
-				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
-				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
-				// bitmap = getRotatedBitmap(rotate, bitmap, exif);
-//				Log.i(LOG_TAG, "URI: " + this.imageUri.toString());
-//				OutputStream os = this.cordova.getActivity().getContentResolver()
-//						.openOutputStream(this.imageUri);
-//				boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, this.mQuality, os);
-//				// Log.i(LOG_TAG, "Compression success: " + success);
-//				os.close();
-				//Clear the memory
-//				bitmap.recycle();
-//				bitmap = null;
-//				System.gc();
-				//Reload the bitmap
-//				try {
-//					bitmap = android.provider.MediaStore.Images.Media
-//							.getBitmap(this.cordova.getActivity().getContentResolver(), imageUri);
-//				} catch (FileNotFoundException e) {
-//					Uri uri = intent.getData();
-//					android.content.ContentResolver resolver = this.cordova.getActivity().getContentResolver();
-//					bitmap = android.graphics.BitmapFactory
-//							.decodeStream(resolver.openInputStream(uri));
-//				}
-				// Log.i(LOG_TAG, "*After compression*");
-				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
-				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
-
-				// Restore exif data to file
-//				exif.createOutFile(this.imageUri.getPath());
-//				exif.writeExifData();
 
 				JSONObject returnObject = new JSONObject();
 				returnObject.put("url", this.imageUri.toString());
@@ -236,9 +169,6 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				// Send Uri back to JavaScript for viewing image
 				this.callbackContext.sendPluginResult(result);
 
-//				bitmap.recycle();
-//				bitmap = null;
-//				System.gc();/
 			} catch (IOException e) {
 				e.printStackTrace();
 				this.failPicture("Error capturing image.");
@@ -258,106 +188,6 @@ public class NativeCameraLauncher extends CordovaPlugin {
 			this.failPicture("Did not complete!");
 		}
 	}
-
-	public Bitmap scaleBitmap(Bitmap bitmap) {
-		int targetWidth = this.targetWidth;
-		int targetHeight = this.targetHeight;
-		int origWidth = bitmap.getWidth();
-		int origHeight = bitmap.getHeight();
-
-		// If no new width or height were specified return the original bitmap
-		if (targetWidth <= 0 && targetHeight <= 0) {
-			return bitmap;
-		}
-		// Only the width was specified
-		else if (targetWidth > 0 && targetHeight <= 0) {
-			targetHeight = (targetWidth * origHeight) / origWidth;
-		}
-		// only the height was specified
-		else if (targetWidth <= 0 && targetHeight > 0) {
-			targetWidth = (targetHeight * origWidth) / origHeight;
-		}
-
-		Log.i(LOG_TAG, "ScaledBitmap targetW: " + targetWidth);
-		Log.i(LOG_TAG, "ScaledBitmap targetH: " + targetHeight);
-		Log.i(LOG_TAG, "ScaledBitmap origW: " + origWidth);
-		Log.i(LOG_TAG, "ScaledBitmap origH: " + origHeight);
-		//Now we know a value for targetHeight and targetWidth has been set.
-
-		float scaleFactor = getMemorySavingDimensions(bitmap, targetWidth, targetHeight);
-		if (scaleFactor <= 1) {
-			return bitmap;
-		} else {
-			//Downsample mechanism 1
-			int newWidth = (int)(origWidth / scaleFactor);
-			int newHeight = (int)(origHeight / scaleFactor);
-			Log.i(LOG_TAG, "ScaledBitmap finalW: " + newWidth);
-			Log.i(LOG_TAG, "ScaledBitmap finalH: " + newHeight);
-			//return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
-			// return scaleMechanism2(bitmap, newWidth, newHeight);
-
-			bitmap = ThumbnailUtils.extractThumbnail(bitmap, newWidth, newHeight,
-					ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-			return bitmap;
-
-		}
-	}
-
-	private Bitmap scaleMechanism2(Bitmap bitmap, int newWidth, int newHeight) {
-
-		Bitmap scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Config.ARGB_8888);
-
-	    float ratioX = newWidth / (float) bitmap.getWidth();
-	    float ratioY = newHeight / (float) bitmap.getHeight();
-	    float middleX = newWidth / 2.0f;
-	    float middleY = newHeight / 2.0f;
-
-	    Matrix scaleMatrix = new Matrix();
-	    scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
-
-	    Canvas canvas = new Canvas(scaledBitmap);
-	    canvas.setMatrix(scaleMatrix);
-	    canvas.drawBitmap(bitmap, middleX - bitmap.getWidth() / 2, middleY - bitmap.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
-
-		Log.i(LOG_TAG, "!Returning new bitmap!");
-
-	    return scaledBitmap;
-
-	}
-
-	private float getMemorySavingDimensions(Bitmap bitmap, int targetWidth, int targetHeight) {
-		float ratioX = (float) bitmap.getWidth() / targetWidth;
-	    float ratioY = (float) bitmap.getHeight() / targetHeight;
-		float scaleFactor = ratioX < ratioY ? ratioX : ratioY;
-		if (scaleFactor > 3) {
-			scaleFactor = 3;
-		}
-		Log.i(LOG_TAG, "MemorySavingDimensions ratioX " + ratioX);
-		Log.i(LOG_TAG, "MemorySavingDimensions ratioY " + ratioY);
-		Log.i(LOG_TAG, "ScaleFactor: " + scaleFactor);
-		return scaleFactor;
-	}
-
-	private Bitmap getRotatedBitmap(int rotate, Bitmap bitmap, ExifHelper exif) {
-        Matrix matrix = new Matrix();
-		Log.i(LOG_TAG, "Setting rotation on compressed image: " + rotate);
-        matrix.setRotate(rotate);
-        try
-        {
-			Log.d(LOG_TAG, "getRotatedBitmap NOT OUT OF MEMORY");
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            exif.resetOrientation();
-        }
-        catch (OutOfMemoryError oom)
-        {
-			Log.d(LOG_TAG, "getRotatedBitmap OUT OF MEMORY");
-            // You can run out of memory if the image is very large:
-            // http://simonmacdonald.blogspot.ca/2012/07/change-to-camera-code-in-phonegap-190.html
-            // If this happens, simply do not rotate the image and return it unmodified.
-            // If you do not catch the OutOfMemoryError, the Android app crashes.
-        }
-        return bitmap;
-    }
 
 	private String getTempDirectoryPath(Context ctx) {
 		File cache = null;
