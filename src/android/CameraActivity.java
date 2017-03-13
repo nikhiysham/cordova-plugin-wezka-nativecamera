@@ -266,17 +266,17 @@ public class CameraActivity extends Activity implements SensorEventListener {
 
     private void attemptToTakePicture() {
         Parameters p = camera.getParameters();
-        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(cam, info);
-        Log.d(TAG, "Camera rotation detected to be: " + info.orientation);
-        int toRotate = info.orientation + degrees - 90;
-        Log.d(TAG, "To rotate before checking 0/360 bounds: " + toRotate);
-        if (toRotate < 0 || toRotate > 360) {
-            toRotate = (toRotate < 0) ? toRotate + 360 : toRotate - 360;
-        }
-        Log.d(TAG, "To rotate, after applying 0/360 bound rotation: " + toRotate);
-        p.setRotation(toRotate);
-        camera.setParameters(p);
+        // android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+        // android.hardware.Camera.getCameraInfo(cam, info);
+        // Log.d(TAG, "Camera rotation detected to be: " + info.orientation);
+        // int toRotate = info.orientation + degrees - 90;
+        // Log.d(TAG, "To rotate before checking 0/360 bounds: " + toRotate);
+        // if (toRotate < 0 || toRotate > 360) {
+        //     toRotate = (toRotate < 0) ? toRotate + 360 : toRotate - 360;
+        // }
+        // Log.d(TAG, "To rotate, after applying 0/360 bound rotation: " + toRotate);
+        // p.setRotation(toRotate);
+        // camera.setParameters(p);
         pressed = true;
         // Auto-focus first, catching rare autofocus error
         try {

@@ -141,32 +141,41 @@ public class NativeCameraLauncher extends CordovaPlugin {
 		if (resultCode == Activity.RESULT_OK) {
 			int rotate = 0;
 			try {
+				// check if the image was written to
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inJustDecodeBounds = true;
+				Bitmap bitmap = BitmapFactory.decodeFile(this.imageUri.getPath(), options);
+				if (options.outWidth == -1 || options.outHeight == -1) {
+					this.failPicture("Error decoding image.");
+					return;
+				}
+				
 				// Create an ExifHelper to save the exif data that is lost
 				// during compression
+
 				ExifHelper exif = new ExifHelper();
-				exif.createInFile(getTempDirectoryPath(this.cordova.getActivity().getApplicationContext())
-						+ "/Pic-" + this.date + ".jpg");
+				exif.createInFile(this.imageUri.getPath());
 				exif.readExifData();
 				rotate = exif.getOrientation();
 				Log.i(LOG_TAG, "Uncompressed image rotation value: " + rotate);
 
 				// Read in bitmap of captured image
-				Bitmap bitmap;
-				try {
-					bitmap = android.provider.MediaStore.Images.Media
-							.getBitmap(this.cordova.getActivity().getContentResolver(), imageUri);
-				} catch (FileNotFoundException e) {
-					Uri uri = intent.getData();
-					android.content.ContentResolver resolver = this.cordova.getActivity().getContentResolver();
-					bitmap = android.graphics.BitmapFactory
-							.decodeStream(resolver.openInputStream(uri));
-				}
-
-				// If bitmap cannot be decoded, this may return null
-				if (bitmap == null) {
-					this.failPicture("Error decoding image.");
-					return;
-				}
+//				Bitmap bitmap;
+//				try {
+//					bitmap = android.provider.MediaStore.Images.Media
+//							.getBitmap(this.cordova.getActivity().getContentResolver(), imageUri);
+//				} catch (FileNotFoundException e) {
+//					Uri uri = intent.getData();
+//					android.content.ContentResolver resolver = this.cordova.getActivity().getContentResolver();
+//					bitmap = android.graphics.BitmapFactory
+//							.decodeStream(resolver.openInputStream(uri));
+//				}
+//
+//				// If bitmap cannot be decoded, this may return null
+//				if (bitmap == null) {
+//					this.failPicture("Error decoding image.");
+//					return;
+//				}
 
 				// Log.i(LOG_TAG, "*Memory before scaling: *");
 				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
@@ -174,7 +183,7 @@ public class NativeCameraLauncher extends CordovaPlugin {
 
 				// bitmap = scaleBitmap(bitmap);
 				//Immediately clear the memory associated with previous bitmap
-				System.gc();
+//				System.gc();
 
 				// Log.i(LOG_TAG, "*Memory after scaling: *");
 				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
@@ -186,33 +195,33 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
 				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
 				// bitmap = getRotatedBitmap(rotate, bitmap, exif);
-				Log.i(LOG_TAG, "URI: " + this.imageUri.toString());
-				OutputStream os = this.cordova.getActivity().getContentResolver()
-						.openOutputStream(this.imageUri);
-				boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, this.mQuality, os);
-				// Log.i(LOG_TAG, "Compression success: " + success);
-				os.close();
+//				Log.i(LOG_TAG, "URI: " + this.imageUri.toString());
+//				OutputStream os = this.cordova.getActivity().getContentResolver()
+//						.openOutputStream(this.imageUri);
+//				boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, this.mQuality, os);
+//				// Log.i(LOG_TAG, "Compression success: " + success);
+//				os.close();
 				//Clear the memory
-				bitmap.recycle();
-				bitmap = null;
-				System.gc();
+//				bitmap.recycle();
+//				bitmap = null;
+//				System.gc();
 				//Reload the bitmap
-				try {
-					bitmap = android.provider.MediaStore.Images.Media
-							.getBitmap(this.cordova.getActivity().getContentResolver(), imageUri);
-				} catch (FileNotFoundException e) {
-					Uri uri = intent.getData();
-					android.content.ContentResolver resolver = this.cordova.getActivity().getContentResolver();
-					bitmap = android.graphics.BitmapFactory
-							.decodeStream(resolver.openInputStream(uri));
-				}
+//				try {
+//					bitmap = android.provider.MediaStore.Images.Media
+//							.getBitmap(this.cordova.getActivity().getContentResolver(), imageUri);
+//				} catch (FileNotFoundException e) {
+//					Uri uri = intent.getData();
+//					android.content.ContentResolver resolver = this.cordova.getActivity().getContentResolver();
+//					bitmap = android.graphics.BitmapFactory
+//							.decodeStream(resolver.openInputStream(uri));
+//				}
 				// Log.i(LOG_TAG, "*After compression*");
 				// Log.i(LOG_TAG, "getAllocationByteCount: " + bitmap.getAllocationByteCount());
 				// Log.i(LOG_TAG, "getByteCount: " + bitmap.getByteCount());
 
 				// Restore exif data to file
-				exif.createOutFile(this.imageUri.getPath());
-				exif.writeExifData();
+//				exif.createOutFile(this.imageUri.getPath());
+//				exif.writeExifData();
 
 				JSONObject returnObject = new JSONObject();
 				returnObject.put("url", this.imageUri.toString());
@@ -227,9 +236,9 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				// Send Uri back to JavaScript for viewing image
 				this.callbackContext.sendPluginResult(result);
 
-				bitmap.recycle();
-				bitmap = null;
-				System.gc();
+//				bitmap.recycle();
+//				bitmap = null;
+//				System.gc();/
 			} catch (IOException e) {
 				e.printStackTrace();
 				this.failPicture("Error capturing image.");
