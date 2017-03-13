@@ -156,6 +156,10 @@ public class NativeCameraLauncher extends CordovaPlugin {
 				rotate = exif.getOrientation();
 				Log.i(LOG_TAG, "Uncompressed image rotation value: " + rotate);
 
+				exif.resetOrientation();
+				exif.createOutFile(this.imageUri.getPath());
+				exif.writeExifData();
+
 				JSONObject returnObject = new JSONObject();
 				returnObject.put("url", this.imageUri.toString());
 				returnObject.put("rotation", rotate);
