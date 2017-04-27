@@ -14,7 +14,7 @@
     </js-module>
 
     <js-module src="www/Camera.js" name="camera">
-        <clobbers target="navigator.camera" />
+        <clobbers target="navigator.cameranative" />
     </js-module>
 
     <!-- android -->
